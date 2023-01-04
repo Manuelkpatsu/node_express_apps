@@ -2,7 +2,7 @@ const express = require('express')
 const http = require('http')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
-const cookieParser = require('cookie-parser')
+// const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const FileStore = require('session-file-store')(session)
 require('dotenv').config()
@@ -10,6 +10,7 @@ require('dotenv').config()
 const dishRouter = require('./routes/dishRouter')
 const promoRouter = require('./routes/promoRouter')
 const leaderRouter = require('./routes/leaderRouter')
+const userRouter = require('./routes/userRouter')
 
 const hostname = 'localhost'
 const port = 3000
@@ -35,42 +36,18 @@ app.use(session({
   store: new FileStore()
 }))
 
+app.use('/users', userRouter)
+
 function auth(req, res, next) {
-  console.log(req.session)
-
   if (!req.session.user) {
-    var authHeader = req.headers.authorization
-
-    if (!authHeader) {
-      var err = new Error('You are not authenticated!')
-
-      res.setHeader('WWW-Authenticate', 'Basic')
-      err.status = 401
-      next(err)
-      return
-    }
-
-    var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':')
-
-    var username = auth[0]
-    var password = auth[1]
-
-    if (username === 'admin' && password === 'password') {
-      req.session.user = 'admin'
-      next()
-    } else {
-      var err = new Error('You are not authenticated!')
-
-      res.setHeader('WWW-Authenticate', 'Basic')
-      err.status = 401
-      next(err)
-    }
+    var err = new Error('You are not authenticated!')
+    err.status = 403
+    return next(err)
   } else {
-    if (req.session.user === 'admin') {
+    if (req.session.user === 'authenticated') {
       next()
     } else {
       var err = new Error('You are not authenticated!')
-
       err.status = 401
       next(err)
     }
