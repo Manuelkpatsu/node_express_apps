@@ -5,12 +5,15 @@ const mongoose = require('mongoose')
 // const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const FileStore = require('session-file-store')(session)
+const passport = require('passport')
 require('dotenv').config()
 
 const dishRouter = require('./routes/dishRouter')
 const promoRouter = require('./routes/promoRouter')
 const leaderRouter = require('./routes/leaderRouter')
 const userRouter = require('./routes/userRouter')
+
+const authenticate = require('./authenticate')
 
 const hostname = 'localhost'
 const port = 3000
@@ -35,22 +38,18 @@ app.use(session({
   resave: false,
   store: new FileStore()
 }))
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use('/users', userRouter)
 
 function auth(req, res, next) {
-  if (!req.session.user) {
+  if (!req.user) {
     var err = new Error('You are not authenticated!')
     err.status = 403
     return next(err)
   } else {
-    if (req.session.user === 'authenticated') {
-      next()
-    } else {
-      var err = new Error('You are not authenticated!')
-      err.status = 401
-      next(err)
-    }
+    next()
   }
 }
 
