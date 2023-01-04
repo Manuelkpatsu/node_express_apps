@@ -3,6 +3,9 @@ const http = require('http')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
 const cookieParser = require('cookie-parser')
+const session = require('express-session')
+const FileStore = require('session-file-store')(session)
+require('dotenv').config()
 
 const dishRouter = require('./routes/dishRouter')
 const promoRouter = require('./routes/promoRouter')
@@ -23,12 +26,19 @@ connect.then((db) => {
 app.use(morgan('tiny'))
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
-app.use(cookieParser())
+// app.use(cookieParser(process.env.SECRET_KEY))
+app.use(session({
+  name: process.env.SESSION_ID,
+  secret: process.env.SECRET_KEY,
+  saveUninitialized: false,
+  resave: false,
+  store: new FileStore()
+}))
 
 function auth(req, res, next) {
-  console.log(req.signedCookies)
+  console.log(req.session)
 
-  if (!req.signedCookies.user) {
+  if (!req.session.user) {
     var authHeader = req.headers.authorization
 
     if (!authHeader) {
@@ -46,7 +56,7 @@ function auth(req, res, next) {
     var password = auth[1]
 
     if (username === 'admin' && password === 'password') {
-      res.cookie('user', 'admin', { signed: true })
+      req.session.user = 'admin'
       next()
     } else {
       var err = new Error('You are not authenticated!')
@@ -56,7 +66,7 @@ function auth(req, res, next) {
       next(err)
     }
   } else {
-    if (req.signedCookies.user === 'admin') {
+    if (req.session.user === 'admin') {
       next()
     } else {
       var err = new Error('You are not authenticated!')
