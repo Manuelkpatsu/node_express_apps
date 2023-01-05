@@ -13,12 +13,10 @@ const promoRouter = require('./routes/promoRouter')
 const leaderRouter = require('./routes/leaderRouter')
 const userRouter = require('./routes/userRouter')
 
-const authenticate = require('./authenticate')
-
 const hostname = 'localhost'
 const port = 3000
 const app = express()
-const url = 'mongodb://localhost:27017/conFusion'
+const url = process.env.MONGO_URL
 
 mongoose.set('strictQuery', false)
 const connect = mongoose.connect(url)
@@ -30,30 +28,9 @@ connect.then((db) => {
 app.use(morgan('tiny'))
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
-// app.use(cookieParser(process.env.SECRET_KEY))
-app.use(session({
-  name: process.env.SESSION_ID,
-  secret: process.env.SECRET_KEY,
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}))
 app.use(passport.initialize())
-app.use(passport.session())
 
 app.use('/users', userRouter)
-
-function auth(req, res, next) {
-  if (!req.user) {
-    var err = new Error('You are not authenticated!')
-    err.status = 403
-    return next(err)
-  } else {
-    next()
-  }
-}
-
-app.use(auth)
 
 app.use('/dishes', dishRouter)
 app.use('/promotions', promoRouter)
