@@ -6,12 +6,14 @@ const mongoose = require('mongoose')
 const session = require('express-session')
 const FileStore = require('session-file-store')(session)
 const passport = require('passport')
+const createError = require('http-errors')
 require('dotenv').config()
 
 const dishRouter = require('./routes/dishRouter')
 const promoRouter = require('./routes/promoRouter')
 const leaderRouter = require('./routes/leaderRouter')
 const userRouter = require('./routes/userRouter')
+const uploadRouter = require('./routes/uploadeRouter')
 
 const hostname = 'localhost'
 const port = 3000
@@ -35,6 +37,12 @@ app.use('/users', userRouter)
 app.use('/dishes', dishRouter)
 app.use('/promotions', promoRouter)
 app.use('/leaders', leaderRouter)
+app.use('/imageUpload', uploadRouter)
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404))
+})
 
 // error handler
 app.use(function(err, req, res, next) {
