@@ -34,3 +34,11 @@ exports.jwtPassport = passport.use(new JwtStrategy(
     }))
 
 exports.verifyUser = passport.authenticate('jwt', { session: false })
+
+exports.verifyAdmin = function(req, res, next) {
+    if (req.user && req.user.admin === true) {
+        next()
+    } else {
+        res.send(401, 'Unauthorized');
+    }
+}
