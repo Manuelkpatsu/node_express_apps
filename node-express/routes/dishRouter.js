@@ -9,7 +9,7 @@ const dishRouter = express.Router()
 dishRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200) })
 .get(cors.cors, (req, res, next) => {
-    Dish.find({})
+    Dish.find(req.query)
         .populate('comments.author')
         .then((dishes) => {
             res.statusCode = 200
@@ -18,7 +18,7 @@ dishRouter.route('/')
         }, (err) => next(err))
         .catch((err) => next(err))
 })
-.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dish.create(req.body)
         .then((dish) => {
             console.log('Dish created ', dish)
@@ -28,11 +28,11 @@ dishRouter.route('/')
         }, (err) => next(err))
         .catch((err) => next(err))
 })
-.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /dishes')
 })
-.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dish.remove({})
         .then((resp) => {
             res.statusCode = 200
@@ -54,11 +54,11 @@ dishRouter.route('/:dishId')
         }, (err) => next(err))
         .catch((err) => next(err))
 })
-.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     res.statusCode = 403
     res.end('POST operation not supported on /dishes/' + req.params.dishId + '')
 })
-.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dish.findByIdAndUpdate(req.params.dishId, {
         $set: req.body
     }, { new: true })
@@ -69,7 +69,7 @@ dishRouter.route('/:dishId')
         }, (err) => next(err))
         .catch((err) => next(err))
 })
-.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Dish.findByIdAndRemove(req.params.dishId)
         .then((resp) => {
             res.statusCode = 200
