@@ -8,7 +8,7 @@ const favoriteRouter = express.Router()
 
 favoriteRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200) })
-.get(cors.cors, (req, res, next) => {
+.get(cors.cors, authenticate.verifyUser, (req, res, next) => {
     Favorite.findOne({ user: req.user._id })
         .populate('user')
         .populate('dishes')
@@ -83,7 +83,7 @@ favoriteRouter.route('/')
 
 favoriteRouter.route('/:dishId')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200) })
-.get(cors.cors, (req, res, next) => {
+.get(cors.cors, authenticate.verifyUser, (req, res, next) => {
     Favorite.findOne({ user: req.user._id })
         .then((favorites) => {
             if (!favorites) {
@@ -106,7 +106,7 @@ favoriteRouter.route('/:dishId')
             return next(err)
         })
 })
-.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Favorite.findOne({ user: req.user._id }, (err, favorite) => {
         if (err) return next(err)
 
@@ -157,12 +157,12 @@ favoriteRouter.route('/:dishId')
         }
     })
 })
-.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.setHeader('Content-Type', 'text/plain')
     res.end('PUT operation not supported on /favorites/' + req.params.dishId + '')
 })
-.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Favorite.findOne({ user: req.user._id }, (err, favorite) => {
         if (err) return next(err)
 
