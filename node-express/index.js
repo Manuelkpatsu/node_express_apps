@@ -14,6 +14,7 @@ const promoRouter = require('./routes/promoRouter')
 const leaderRouter = require('./routes/leaderRouter')
 const userRouter = require('./routes/userRouter')
 const uploadRouter = require('./routes/uploadeRouter')
+const favoriteRouter = require('./routes/favoriteRouter')
 
 const hostname = 'localhost'
 const port = 3000
@@ -38,6 +39,7 @@ app.use('/dishes', dishRouter)
 app.use('/promotions', promoRouter)
 app.use('/leaders', leaderRouter)
 app.use('/imageUpload', uploadRouter)
+app.use('/favorites', favoriteRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
